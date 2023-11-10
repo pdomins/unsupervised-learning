@@ -22,3 +22,6 @@ def relu_like_neighbours(curr_iter: int, iters: int, k: int, memory: dict[str, A
         return 1
 
     return (((1 - memory['init_radius']) / (iters - alpha - beta))*(curr_iter - beta) + memory['init_radius'], memory)
+
+def exp_neighbours(curr_iter: int, iters: int, k: int, memory: dict[str, Any], gamma: float, delta: float) -> tuple[float, Any]:
+    return (delta*math.exp(-gamma*curr_iter) + 1, None)
