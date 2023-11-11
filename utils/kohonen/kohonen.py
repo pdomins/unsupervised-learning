@@ -1,4 +1,5 @@
 from utils.kohonen.distance import euclidean_distance
+from utils.kohonen.neuron_weights import simple_weight_delta, exp_weight_delta
 from typing import Any, Callable
 import numpy as np
 
@@ -56,3 +57,16 @@ def obtain_neighbour_neurons_idxs(k_i: int, k_j: int, neuron_positions: np.ndarr
                     dists.append(dist)
 
     return (idxs, dists, unscaled_radius, neighbour_memory)
+
+def update_neuron(X_p: np.ndarray, neuron_positions: np.ndarray, i: int, j: int, 
+                  lr: float, d: float, R: float,
+                  weight_delta_function: Callable[[np.ndarray, np.ndarray, float, float, float], np.ndarray]) -> None:
+    neuron_positions[i, j] = neuron_positions[i, j] + weight_delta_function(X_p, neuron_positions[i, j], lr, d, R)
+
+def update_winner(X_p: np.ndarray, neuron_positions: np.ndarray, i: int, j: int, 
+                  lr: float) -> None:
+    update_neuron(X_p, neuron_positions, i, j, lr, None, None, simple_weight_delta)
+
+def update_neighbour(X_p: np.ndarray, neuron_positions: np.ndarray, i: int, j: int, 
+                     lr: float, d: float, R: float) -> None:
+    update_neuron(X_p, neuron_positions, i, j, lr, d, R, exp_weight_delta)
