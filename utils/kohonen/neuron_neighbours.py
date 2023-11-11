@@ -24,6 +24,3 @@ def relu_like_neighbour_radius(curr_iter: int, iters: int, k: int, memory: dict[
 
 def exp_neighbour_radius(curr_iter: int, iters: int, k: int, memory: dict[str, Any], gamma: float = 1, delta: float = 1) -> tuple[float, Any]:
     return (delta*math.exp(-gamma*curr_iter) + 1, None)
-
-def exp_neighbour_influence_function(d: float, R: float) -> float:
-    return math.e(-2*d/R)
