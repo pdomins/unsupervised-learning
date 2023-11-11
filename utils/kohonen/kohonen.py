@@ -2,6 +2,7 @@ from utils.kohonen.distance import euclidean_distance
 from utils.kohonen.neuron_weights import simple_weight_delta, exp_weight_delta
 from typing import Any, Callable
 import numpy as np
+import math
 
 def build_network_positions(k: int) -> np.ndarray:
     k_vals = np.arange(k)
@@ -85,3 +86,54 @@ def update_neighbours(X_p: np.ndarray, neuron_positions: np.ndarray, neighbour_i
             scaled_R = R*diagonal_scale
 
         update_neighbour(X_p, neuron_positions, i, j, lr, d, scaled_R)
+
+def build_kohonen_net(X: np.ndarray, k: int, iters: int,
+                      weight_init_function: Callable[[np.ndarray, int], np.ndarray],
+                      sample_picker_function: Callable[[np.ndarray, dict[str, Any]], tuple[np.ndarray, dict[str, Any]]],
+                      neighbour_radius_function: Callable[[int, int, int, dict[str, Any]], tuple[float, dict[str, Any]]],
+                      learning_rate_function: Callable[[int], float],
+                      grid_type: str) -> None:
+    
+    GRID_TYPES = {
+        "rectangular" : {
+            "scales" : {
+                "direct"   : 1,
+                "diagonal" : 1
+            }
+        },
+        "hexagonal" : {
+            "scales" : {
+                "direct"   : 1,
+                "diagonal" : math.sqrt(4 / 3)
+            }
+        }
+    }
+
+    if grid_type not in GRID_TYPES:
+        raise ValueError("invalid value for grid_type '{}'".format(grid_type))
+
+    direct_scale = GRID_TYPES[grid_type]["scales"]["direct"]
+    diagonal_scale = GRID_TYPES[grid_type]["scales"]["diagonal"]
+
+    neuron_positions = build_network_positions(k)
+    neuron_weights = weight_init_function(X, k)
+    
+    picker_mem = dict()
+    neighbour_memory = dict()
+
+    for curr_iter in range(iters):
+        X_p, picker_mem = sample_picker_function(X, picker_mem)
+        
+        k_i, k_j = obtain_winning_neuron_idx(X_p, neuron_weights, k)
+
+        neighbour_idxs, neighbour_dists, radius, neighbour_memory = obtain_neighbour_neurons_idxs(k_i, k_j, neuron_positions, k,
+                                                                                                  curr_iter, iters,
+                                                                                                  direct_scale, diagonal_scale,
+                                                                                                  neighbour_radius_function,
+                                                                                                  neighbour_memory)
+        
+        lr = learning_rate_function(curr_iter)
+
+        update_winner(X_p, neuron_positions, k_i, k_j, lr)
+
+        update_neighbours(X_p, neuron_positions, neighbour_idxs, lr, neighbour_dists, radius, k_i, direct_scale, diagonal_scale)
