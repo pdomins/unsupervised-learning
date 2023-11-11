@@ -1,4 +1,5 @@
 from utils.kohonen.distance import euclidean_distance
+from typing import Any, Callable
 import numpy as np
 
 def build_network_positions(k: int) -> np.ndarray:
