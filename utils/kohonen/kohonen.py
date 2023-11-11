@@ -4,10 +4,16 @@ from typing import Any, Callable
 import numpy as np
 import math
 
-def build_network_positions(k: int) -> np.ndarray:
+def build_network_positions(k: int, even_displacements: float = 0, odd_displacements: float = 0) -> np.ndarray:
     k_vals = np.arange(k)
     
     xx, yy = np.meshgrid(k_vals, k_vals)
+
+    xx = xx.astype(float)
+    yy = yy.astype(float)
+
+    xx[::2] += even_displacements
+    xx[::-2] += odd_displacements
 
     neuron_positions = np.zeros((k, k, 2))
     neuron_positions[:,:,0] = yy
@@ -99,12 +105,20 @@ def build_kohonen_net(X: np.ndarray, k: int, iters: int,
             "scales" : {
                 "direct"   : 1,
                 "diagonal" : 1
+            },
+            "displacements" : {
+                "even" : 0,
+                "odd"  : 0
             }
         },
         "hexagonal" : {
             "scales" : {
                 "direct"   : 1,
                 "diagonal" : math.sqrt(4 / 3)
+            },
+            "displacements" : {
+                "even" : 0,
+                "odd"  : 0.5 
             }
         }
     }
@@ -115,7 +129,10 @@ def build_kohonen_net(X: np.ndarray, k: int, iters: int,
     direct_scale = GRID_TYPES[grid_type]["scales"]["direct"]
     diagonal_scale = GRID_TYPES[grid_type]["scales"]["diagonal"]
 
-    neuron_positions = build_network_positions(k)
+    even_displacements = GRID_TYPES[grid_type]["displacements"]["even"]
+    odd_displacements = GRID_TYPES[grid_type]["displacements"]["odd"]
+
+    neuron_positions = build_network_positions(k, even_displacements, odd_displacements)
     neuron_weights = weight_init_function(X, k)
     
     picker_mem = dict()
