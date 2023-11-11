@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 def random_weight_init(X: np.ndarray, k: int) -> np.ndarray:
     n = X.shape[1]
@@ -31,3 +32,7 @@ def random_sample_weight_init_with_repos(X: np.ndarray, k: int) -> np.ndarray:
 
 def random_sample_weight_init_no_repos(X: np.ndarray, k: int) -> np.ndarray:
     return random_sample_weight_init(X, k, False)
+
+def simple_weight_delta(X_p: np.ndarray, W_j: np.ndarray,
+                        lr: float, d: float, R: float) -> np.ndarray:
+    return lr * (X_p - W_j)
