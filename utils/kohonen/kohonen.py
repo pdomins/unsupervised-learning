@@ -70,3 +70,18 @@ def update_winner(X_p: np.ndarray, neuron_positions: np.ndarray, i: int, j: int,
 def update_neighbour(X_p: np.ndarray, neuron_positions: np.ndarray, i: int, j: int, 
                      lr: float, d: float, R: float) -> None:
     update_neuron(X_p, neuron_positions, i, j, lr, d, R, exp_weight_delta)
+
+def update_neighbours(X_p: np.ndarray, neuron_positions: np.ndarray, neighbour_idxs: list[tuple[int, int]],
+                      lr: float, D: list[float], R: float, k_i: int, direct_scale: float, diagonal_scale: float) -> None:
+    direct_row = k_i % 2
+
+    for neighbour_number in range(len(neighbour_idxs)):
+        i, j = neighbour_idxs[neighbour_number]
+        d = D[neighbour_number]
+
+        if i % 2 == direct_row:
+            scaled_R = R*direct_scale
+        else:
+            scaled_R = R*diagonal_scale
+
+        update_neighbour(X_p, neuron_positions, i, j, lr, d, scaled_R)
