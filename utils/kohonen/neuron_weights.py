@@ -36,3 +36,8 @@ def random_sample_weight_init_no_repos(X: np.ndarray, k: int) -> np.ndarray:
 def simple_weight_delta(X_p: np.ndarray, W_j: np.ndarray,
                         lr: float, d: float, R: float) -> np.ndarray:
     return lr * (X_p - W_j)
+
+def exp_weight_delta(X_p: np.ndarray, W_j: np.ndarray,
+                     lr: float, d: float, R: float) -> np.ndarray:
+    V = math.exp(-2*d / R)
+    return V * lr * (X_p - W_j)
