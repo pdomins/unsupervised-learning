@@ -1,8 +1,16 @@
 from utils.kohonen.distance import euclidean_distance
 from utils.kohonen.neuron_weights import simple_weight_delta, exp_weight_delta
 from typing import Any, Callable
+from dataclasses import dataclass
 import numpy as np
 import math
+
+@dataclass
+class KohonenNet:
+    k: int
+    neuron_positions: np.ndarray
+    neuron_weights: np.ndarray
+    grid_type: str
 
 def build_network_positions(k: int, even_displacements: float = 0, odd_displacements: float = 0) -> np.ndarray:
     k_vals = np.arange(k)
@@ -124,7 +132,7 @@ def build_kohonen_net(X: np.ndarray, k: int, iters: int,
                       sample_picker_function: Callable[[np.ndarray, dict[str, Any]], tuple[np.ndarray, dict[str, Any]]],
                       neighbour_radius_function: Callable[[int, int, int, dict[str, Any]], tuple[float, dict[str, Any]]],
                       learning_rate_function: Callable[[int], float],
-                      grid_type: str) -> None:
+                      grid_type: str) -> KohonenNet:
     
     GRID_TYPES = obtain_grid_types_data()
 
@@ -159,3 +167,5 @@ def build_kohonen_net(X: np.ndarray, k: int, iters: int,
         update_winner(X_p, neuron_positions, k_i, k_j, lr)
 
         update_neighbours(X_p, neuron_positions, neighbour_idxs, lr, neighbour_dists, radius, k_i, direct_scale, diagonal_scale)
+
+    return KohonenNet(k, neuron_positions, neuron_weights, grid_type)
