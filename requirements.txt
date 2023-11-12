@@ -1,0 +1,6 @@
+numpy==1.26.1
+packaging==23.2
+plotly==5.18.0
+scipy==1.11.3
+spicy==0.16.0
+tenacity==8.2.3
