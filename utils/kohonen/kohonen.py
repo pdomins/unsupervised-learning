@@ -93,13 +93,7 @@ def update_neighbours(X_p: np.ndarray, neuron_positions: np.ndarray, neighbour_i
 
         update_neighbour(X_p, neuron_positions, i, j, lr, d, scaled_R)
 
-def build_kohonen_net(X: np.ndarray, k: int, iters: int,
-                      weight_init_function: Callable[[np.ndarray, int], np.ndarray],
-                      sample_picker_function: Callable[[np.ndarray, dict[str, Any]], tuple[np.ndarray, dict[str, Any]]],
-                      neighbour_radius_function: Callable[[int, int, int, dict[str, Any]], tuple[float, dict[str, Any]]],
-                      learning_rate_function: Callable[[int], float],
-                      grid_type: str) -> None:
-    
+def obtain_grid_types_data() -> dict[str, Any]:
     GRID_TYPES = {
         "rectangular" : {
             "scales" : {
@@ -122,6 +116,17 @@ def build_kohonen_net(X: np.ndarray, k: int, iters: int,
             }
         }
     }
+
+    return GRID_TYPES
+
+def build_kohonen_net(X: np.ndarray, k: int, iters: int,
+                      weight_init_function: Callable[[np.ndarray, int], np.ndarray],
+                      sample_picker_function: Callable[[np.ndarray, dict[str, Any]], tuple[np.ndarray, dict[str, Any]]],
+                      neighbour_radius_function: Callable[[int, int, int, dict[str, Any]], tuple[float, dict[str, Any]]],
+                      learning_rate_function: Callable[[int], float],
+                      grid_type: str) -> None:
+    
+    GRID_TYPES = obtain_grid_types_data()
 
     if grid_type not in GRID_TYPES:
         raise ValueError("invalid value for grid_type '{}'".format(grid_type))
