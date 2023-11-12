@@ -12,6 +12,9 @@ class KohonenNet:
     neuron_weights: np.ndarray
     grid_type: str
 
+    def predict(self, X_p: np.ndarray) -> tuple[int, int]:
+        return obtain_winning_neuron_idx(X_p, self.neuron_weights, self.k)
+
 def build_network_positions(k: int, even_displacements: float = 0, odd_displacements: float = 0) -> np.ndarray:
     k_vals = np.arange(k)
     
