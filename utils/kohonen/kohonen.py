@@ -1,4 +1,4 @@
-from utils.kohonen.distance import euclidean_distance
+from utils.distance import euclidean_distance
 from utils.kohonen.neuron_weights import simple_weight_delta, exp_weight_delta
 from typing import Any, Callable
 from dataclasses import dataclass
