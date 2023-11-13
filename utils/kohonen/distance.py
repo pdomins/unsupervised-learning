@@ -1,6 +1,7 @@
 import numpy as np
 import math
 
+
 def euclidean_distance(X_1: np.ndarray, X_2: np.ndarray) -> float:
     X_diff = X_1 - X_2
     X_diff = X_diff[:, None]
@@ -12,6 +13,7 @@ def euclidean_distance(X_1: np.ndarray, X_2: np.ndarray) -> float:
     sqr_norm = X_sqr_diff.sum().item()
 
     return math.sqrt(sqr_norm)
+
 
 def inside_radius(point: np.ndarray, center: np.ndarray, ry: float, rx: float) -> bool:
     y_0 = center[0]
