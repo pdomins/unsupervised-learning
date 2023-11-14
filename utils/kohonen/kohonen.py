@@ -19,6 +19,17 @@ class KohonenNet:
         sample = sample[self.cols]
         X_p = sample.to_numpy()
         return obtain_winning_neuron_idx(X_p, self.neuron_weights, self.k)
+    
+    def activations_mat(self, df: pd.DataFrame) -> np.ndarray:
+        df = df[self.cols]
+        predictions = df.apply(self.predict, axis=1)
+        
+        act_mat = np.zeros((self.k, self.k), dtype=int)
+        for prediction in predictions:
+            i, j = prediction
+            act_mat[i, j] += 1
+
+        return act_mat
 
 
 def build_network_positions(k: int, even_displacements: float = 0, odd_displacements: float = 0) -> np.ndarray:
