@@ -9,12 +9,15 @@ import math
 
 @dataclass
 class KohonenNet:
+    cols: list[str]
     k: int
     neuron_positions: np.ndarray
     neuron_weights: np.ndarray
     grid_type: str
 
-    def predict(self, X_p: np.ndarray) -> tuple[int, int]:
+    def predict(self, sample: pd.Series) -> tuple[int, int]:
+        sample = sample[self.cols]
+        X_p = sample.to_numpy()
         return obtain_winning_neuron_idx(X_p, self.neuron_weights, self.k)
 
 
@@ -147,7 +150,7 @@ def obtain_grid_types_data() -> dict[str, Any]:
 from utils.kohonen.neuron_weights import random_weight_init, random_sample_weight_init_with_repos, random_sample_weight_init_no_repos
 from utils.kohonen.sample_pickers import stochastic_picker, random_shuffle_picker
 
-def build_kohonen_net(X: pd.DataFrame, k: int, iters: int,
+def build_kohonen_net(df: pd.DataFrame, cols: list[str], k: int, iters: int,
                       weight_init_f: str, sample_picker_f: str,
                       neighbour_radius_function: Callable[
                           [int, int, int, dict[str, Any]], tuple[float, dict[str, Any]]],
@@ -164,13 +167,14 @@ def build_kohonen_net(X: pd.DataFrame, k: int, iters: int,
             "random shuffle": random_shuffle_picker
         }
     }
-    X = X.to_numpy()
-    return _build_kohonen_net(X, k, iters, KOHONEN_PARAMS["weight_init"][weight_init_f], 
+    df = df[cols]
+    X = df.to_numpy()
+    return _build_kohonen_net(X, cols, k, iters, KOHONEN_PARAMS["weight_init"][weight_init_f], 
                               KOHONEN_PARAMS["sample_picker"][sample_picker_f],
                               neighbour_radius_function, learning_rate_function, grid_type)
 
 
-def _build_kohonen_net(X: np.ndarray, k: int, iters: int,
+def _build_kohonen_net(X: np.ndarray, cols: list[str], k: int, iters: int,
                       weight_init_function: Callable[[np.ndarray, int], np.ndarray],
                       sample_picker_function: Callable[[np.ndarray, dict[str, Any]], tuple[np.ndarray, dict[str, Any]]],
                       neighbour_radius_function: Callable[
@@ -214,4 +218,4 @@ def _build_kohonen_net(X: np.ndarray, k: int, iters: int,
         update_neighbours(X_p, neuron_weights, neighbour_idxs, lr, neighbour_dists, radius, k_i, direct_scale,
                           diagonal_scale)
 
-    return KohonenNet(k, neuron_positions, neuron_weights, grid_type)
+    return KohonenNet(cols, k, neuron_positions, neuron_weights, grid_type)
