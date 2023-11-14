@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import numpy as np
 
+def plot_u_mat(kohonen_net: KohonenNet, u_mat: np.ndarray, format: str = "{:.2g}") -> None:
+    plot_mat(kohonen_net, u_mat, format)
+
 def plot_mat(kohonen_net: KohonenNet, mat: np.ndarray, format: str = "{}") -> None:
     x = []
     y = []
