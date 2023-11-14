@@ -3,10 +3,10 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import numpy as np
 
-def plot_u_mat(kohonen_net: KohonenNet, u_mat: np.ndarray, format: str = "{:.2g}") -> None:
-    plot_mat(kohonen_net, u_mat, format)
+def plot_u_mat(kohonen_net: KohonenNet, u_mat: np.ndarray, title: str = "Matriz U", format: str = "{:.2g}") -> None:
+    plot_mat(kohonen_net, u_mat, title, format)
 
-def plot_mat(kohonen_net: KohonenNet, mat: np.ndarray, format: str = "{}") -> None:
+def plot_mat(kohonen_net: KohonenNet, mat: np.ndarray, title: str, format: str = "{}") -> None:
     x = []
     y = []
     w = []
@@ -21,10 +21,10 @@ def plot_mat(kohonen_net: KohonenNet, mat: np.ndarray, format: str = "{}") -> No
     y = np.array(y)
     w = np.array(w)
 
-    plot_neurons(kohonen_net, x, y, w, format)
+    plot_neurons(kohonen_net, x, y, w, title, format)
 
 def plot_neurons(kohonen_net: KohonenNet, x: np.ndarray, y: np.ndarray, 
-                 w: np.ndarray, format: str = "{}") -> None:
+                 w: np.ndarray, title: str, format: str = "{}") -> None:
     cdict = {
         'red':   ((0.0, 0.5, 0.5),
                   (1.0, 1.0, 1.0)),
@@ -65,5 +65,5 @@ def plot_neurons(kohonen_net: KohonenNet, x: np.ndarray, y: np.ndarray,
     cb.outline.set_color('black')
     cb.outline.set_linewidth(1)
 
-    plt.title("Matriz U")
+    plt.title(title)
     plt.axis('off')
