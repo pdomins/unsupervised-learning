@@ -2,6 +2,7 @@ from utils.distance import euclidean_distance
 from utils.kohonen.neuron_weights import simple_weight_delta, exp_weight_delta
 from typing import Any, Callable
 from dataclasses import dataclass
+import pandas as pd
 import numpy as np
 import math
 
@@ -143,8 +144,33 @@ def obtain_grid_types_data() -> dict[str, Any]:
 
     return GRID_TYPES
 
+from utils.kohonen.neuron_weights import random_weight_init, random_sample_weight_init_with_repos, random_sample_weight_init_no_repos
+from utils.kohonen.sample_pickers import stochastic_picker, random_shuffle_picker
 
-def build_kohonen_net(X: np.ndarray, k: int, iters: int,
+def build_kohonen_net(X: pd.DataFrame, k: int, iters: int,
+                      weight_init_f: str, sample_picker_f: str,
+                      neighbour_radius_function: Callable[
+                          [int, int, int, dict[str, Any]], tuple[float, dict[str, Any]]],
+                      learning_rate_function: Callable[[int], float],
+                      grid_type: str) -> KohonenNet:
+    KOHONEN_PARAMS = {
+        "weight_init": {
+            "random": random_weight_init,
+            "sample with repos": random_sample_weight_init_with_repos,
+            "sample no repos": random_sample_weight_init_no_repos   
+        },
+        "sample_picker": {
+            "stochastic": stochastic_picker,
+            "random shuffle": random_shuffle_picker
+        }
+    }
+    X = X.to_numpy()
+    return _build_kohonen_net(X, k, iters, KOHONEN_PARAMS["weight_init"][weight_init_f], 
+                              KOHONEN_PARAMS["sample_picker"][sample_picker_f],
+                              neighbour_radius_function, learning_rate_function, grid_type)
+
+
+def _build_kohonen_net(X: np.ndarray, k: int, iters: int,
                       weight_init_function: Callable[[np.ndarray, int], np.ndarray],
                       sample_picker_function: Callable[[np.ndarray, dict[str, Any]], tuple[np.ndarray, dict[str, Any]]],
                       neighbour_radius_function: Callable[
