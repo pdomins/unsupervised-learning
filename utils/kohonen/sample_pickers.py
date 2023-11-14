@@ -3,7 +3,7 @@ import numpy as np
 
 
 def stochastic_picker(X: np.ndarray, memory: dict[str, Any], 
-                      random_state: np.random.Generator) -> tuple[np.ndarray, dict[str, Any]]:
+                      random_state: np.random.Generator = None) -> tuple[np.ndarray, dict[str, Any]]:
     if random_state is None:
         random_state = np.random.default_rng()
 
@@ -13,7 +13,7 @@ def stochastic_picker(X: np.ndarray, memory: dict[str, Any],
 
 
 def random_shuffle_picker(X: np.ndarray, memory: dict[str, Any], 
-                          random_state: np.random.Generator) -> tuple[np.ndarray, dict[str, Any]]:
+                          random_state: np.random.Generator = None) -> tuple[np.ndarray, dict[str, Any]]:
     p = X.shape[0]
 
     if 'I' not in memory or memory['i'] >= p:
