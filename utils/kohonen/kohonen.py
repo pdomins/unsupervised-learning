@@ -30,6 +30,18 @@ class KohonenNet:
             act_mat[i, j] += 1
 
         return act_mat
+    
+    def activations_map(self, df: pd.DataFrame) -> np.ndarray:
+        df = df[self.cols]
+        predictions = df.apply(self.predict, axis=1)
+        
+        act_map = dict()
+        for key in predictions.keys():
+            if predictions[key] not in act_map:
+                act_map[predictions[key]] = []
+            act_map[predictions[key]].append(key)
+
+        return act_map
 
 
 def build_network_positions(k: int, even_displacements: float = 0, odd_displacements: float = 0) -> np.ndarray:
