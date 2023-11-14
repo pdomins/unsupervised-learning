@@ -208,16 +208,21 @@ def build_kohonen_net(df: pd.DataFrame, cols: list[str], k: int, iters: int,
                       neighbour_radius_function: Callable[
                           [int, int, int, dict[str, Any]], tuple[float, dict[str, Any]]],
                       learning_rate_function: Callable[[int], float],
-                      grid_type: str) -> KohonenNet:
+                      grid_type: str,
+                      random_state: np.random.Generator = None) -> KohonenNet:
+    
+    if random_state is None:
+        random_state = np.random.default_rng()
+
     KOHONEN_PARAMS = {
         "weight_init": {
-            "random": random_weight_init,
-            "sample with repos": random_sample_weight_init_with_repos,
-            "sample no repos": random_sample_weight_init_no_repos   
+            "random": lambda X, k : random_weight_init(X, k, random_state),
+            "sample with repos": lambda X, k : random_sample_weight_init_with_repos(X, k, random_state),
+            "sample no repos": lambda X, k : random_sample_weight_init_no_repos(X, k, random_state)
         },
         "sample_picker": {
-            "stochastic": stochastic_picker,
-            "random shuffle": random_shuffle_picker
+            "stochastic": lambda X, memory : stochastic_picker(X, memory, random_state),
+            "random shuffle": lambda X, memory : random_shuffle_picker(X, memory, random_state)
         }
     }
     df = df[cols]
