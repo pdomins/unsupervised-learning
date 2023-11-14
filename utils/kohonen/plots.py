@@ -49,8 +49,12 @@ def plot_neurons(kohonen_net: KohonenNet, x: np.ndarray, y: np.ndarray,
         circle = plt.Circle((x[i], y[i]), 0.45, edgecolor="k", 
                             linewidth=1, facecolor=LavanderHaze(c[i]))
         ax.add_patch(circle)
-        ax.annotate(format.format(w[i]), xy=(x[i], y[i]), 
-                    textcoords="data", ha="center", va="center")
+        if c[i] >= (2/3)*255:
+            ax.annotate(format.format(w[i]), xy=(x[i], y[i]), 
+                        textcoords="data", ha="center", va="center", color="white")
+        else:
+            ax.annotate(format.format(w[i]), xy=(x[i], y[i]), 
+                        textcoords="data", ha="center", va="center")
 
     ax.set_aspect('equal')
     ax.autoscale_view()
