@@ -3,8 +3,25 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import numpy as np
 
+def plot_mat(kohonen_net: KohonenNet, mat: np.ndarray, format: str = "{}") -> None:
+    x = []
+    y = []
+    w = []
+
+    for i in range(kohonen_net.k):
+        for j in range(kohonen_net.k):
+            y.append(kohonen_net.neuron_positions[i, j, 0])
+            x.append(kohonen_net.neuron_positions[i, j, 1])
+            w.append(mat[i, j])
+    
+    x = np.array(x)
+    y = np.array(y)
+    w = np.array(w)
+
+    plot_neurons(kohonen_net, x, y, w, format)
+
 def plot_neurons(kohonen_net: KohonenNet, x: np.ndarray, y: np.ndarray, 
-                 w: np.ndarray, format: str) -> None:
+                 w: np.ndarray, format: str = "{}") -> None:
     cdict = {
         'red':   ((0.0, 0.5, 0.5),
                   (1.0, 1.0, 1.0)),
