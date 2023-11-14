@@ -183,9 +183,9 @@ def build_kohonen_net(X: np.ndarray, k: int, iters: int,
 
         lr = learning_rate_function(curr_iter)
 
-        update_winner(X_p, neuron_positions, k_i, k_j, lr)
+        update_winner(X_p, neuron_weights, k_i, k_j, lr)
 
-        update_neighbours(X_p, neuron_positions, neighbour_idxs, lr, neighbour_dists, radius, k_i, direct_scale,
+        update_neighbours(X_p, neuron_weights, neighbour_idxs, lr, neighbour_dists, radius, k_i, direct_scale,
                           diagonal_scale)
 
     return KohonenNet(k, neuron_positions, neuron_weights, grid_type)
