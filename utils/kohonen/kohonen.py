@@ -42,6 +42,36 @@ class KohonenNet:
             act_map[predictions[key]].append(key)
 
         return act_map
+    
+    def u_mat(self) -> np.ndarray:
+        GRID_TYPES = obtain_grid_types_data()
+        scales = GRID_TYPES[self.grid_type]["scales"]
+        direct_radius = scales["direct"]
+        diagonal_radius = scales["diagonal"]
+
+        neighbour_count = np.zeros((self.k, self.k))
+        neighbour_sum = np.zeros((self.k, self.k))
+
+        for k_i in range(self.k):
+            direct_row = k_i % 2
+            for k_j in range(self.k):
+                winner = self.neuron_weights[k_i, k_j]
+
+                for i in range(self.k):
+                    for j in range(self.k):
+                        if not (i == k_i and j == k_j):
+                            neighbour = self.neuron_weights[i, j]
+
+                            row_type = i % 2
+                            dist = euclidean_distance(neighbour, winner)
+
+                            if (row_type == direct_row and dist <= direct_radius) or \
+                                    (row_type != direct_row and dist <= diagonal_radius):
+                                neighbour_sum[k_i, k_j] += dist
+                                neighbour_count[k_i, k_j] += 1
+
+        neighbour_sum = np.divide(neighbour_sum, neighbour_count, where=(neighbour_sum > 0))
+        return neighbour_sum
 
 
 def build_network_positions(k: int, even_displacements: float = 0, odd_displacements: float = 0) -> np.ndarray:
