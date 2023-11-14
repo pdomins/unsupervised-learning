@@ -38,12 +38,12 @@ def random_sample_weight_init(X: np.ndarray, k: int, replace: bool,
     return neuron_weights
 
 
-def random_sample_weight_init_with_repos(X: np.ndarray, k: int) -> np.ndarray:
-    return random_sample_weight_init(X, k, True)
+def random_sample_weight_init_with_repos(X: np.ndarray, k: int, random_state: np.random.Generator = None) -> np.ndarray:
+    return random_sample_weight_init(X, k, True, random_state)
 
 
-def random_sample_weight_init_no_repos(X: np.ndarray, k: int) -> np.ndarray:
-    return random_sample_weight_init(X, k, False)
+def random_sample_weight_init_no_repos(X: np.ndarray, k: int, random_state: np.random.Generator = None) -> np.ndarray:
+    return random_sample_weight_init(X, k, False, random_state)
 
 
 def simple_weight_delta(X_p: np.ndarray, W_j: np.ndarray,
