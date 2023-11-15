@@ -63,14 +63,20 @@ class KohonenNet:
                             neighbour = self.neuron_weights[i, j]
 
                             row_type = i % 2
-                            dist = euclidean_distance(neighbour, winner)
+                            weight_dist = euclidean_distance(neighbour, winner)
+                            pos_dist = euclidean_distance(self.neuron_positions[k_i, k_j], self.neuron_positions[i, j])
 
-                            if (row_type == direct_row and dist <= direct_radius) or \
-                                    (row_type != direct_row and dist <= diagonal_radius):
-                                neighbour_sum[k_i, k_j] += dist
+                            if weight_dist <= np.finfo(float).eps:
+                                weight_dist = 0
+
+                            if (row_type == direct_row and pos_dist <= direct_radius) or \
+                                    (row_type != direct_row and pos_dist <= diagonal_radius):
+                                neighbour_sum[k_i, k_j] += weight_dist
                                 neighbour_count[k_i, k_j] += 1
 
+        neighbour_sum[neighbour_sum < np.finfo(float).eps] = 0
         neighbour_sum = np.divide(neighbour_sum, neighbour_count, where=(neighbour_sum > 0))
+        neighbour_sum[neighbour_sum < np.finfo(float).eps] = 0
         return neighbour_sum
 
 
@@ -101,6 +107,9 @@ def obtain_winning_neuron_idx(X_p: np.ndarray, neuron_weights: np.ndarray, k: in
             W_j = neuron_weights[i, j]
             dist = euclidean_distance(X_p, W_j)
 
+            if dist <= np.finfo(float).eps:
+                dist = 0
+
             if min_dist is None or dist < min_dist:
                 min_dist = dist
                 k_i = i
@@ -130,6 +139,9 @@ def obtain_neighbour_neurons_idxs(k_i: int, k_j: int, neuron_positions: np.ndarr
                 row_type = i % 2
                 neighbour = neuron_positions[i, j]
                 dist = euclidean_distance(neighbour, winner)
+
+                if dist <= np.finfo(float).eps:
+                    dist = 0
 
                 if row_type == direct_row and dist <= direct_radius:
                     idxs.append((i, j))
