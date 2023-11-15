@@ -30,6 +30,8 @@ def plot_neurons(kohonen_net: KohonenNet, x: np.ndarray, y: np.ndarray,
     min_w = w.min()
     max_w = w.max()
     range_w = max_w - min_w
+    if range_w == 0:
+        range_w = 1
     c = ((w - min_w) / range_w)
     
     ax = plt.gca()
