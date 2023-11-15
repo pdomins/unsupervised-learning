@@ -1,7 +1,10 @@
 import os
+
 import numpy as np
 import pandas as pd
 import seaborn as sns
+from sklearn.metrics import accuracy_score, precision_score
+
 import matplotlib.pyplot as plt
 from scipy.cluster.hierarchy import linkage, dendrogram, fcluster
 from scipy.spatial.distance import pdist, squareform
@@ -64,7 +67,7 @@ def plot_conf_matrix(text_df: pd.DataFrame):
 
     plt.figure(figsize=(8, 6))
     plt.imshow(cm, interpolation='nearest', cmap=sns.cubehelix_palette(as_cmap=True, rot=.2, gamma=.5))
-    plt.title(f"Confusion Matrix for k = 3")
+    plt.title(f"Confusion Matrix for k = 5")
     plt.colorbar()
 
     tick_marks = np.arange(len(class_labels))
@@ -80,5 +83,13 @@ def plot_conf_matrix(text_df: pd.DataFrame):
 
     plt.tight_layout()
     os.makedirs("output", exist_ok=True)
-    plt.savefig(f"output/confusion_matrix_k3.png", bbox_inches='tight', dpi=1200)
+    plt.savefig(f"output/confusion_matrix_k5.png", bbox_inches='tight', dpi=1200)
     plt.close()
+
+    precision = precision_score(to_predict, predictions, average='weighted')
+    accuracy = accuracy_score(to_predict, predictions)
+    error_precision = 1 - precision
+    error_accuracy = 1 - accuracy
+
+    print(f"Precision: {precision:.5f}, Error (Precision): {error_precision:.5f}")
+    print(f"Accuracy: {accuracy:.5f}, Error (Accuracy): {error_accuracy:.5f}")
