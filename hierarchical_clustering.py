@@ -12,6 +12,13 @@ def main():
     df = clean_and_filter_df(df)
     df = filter_genres(df)
     copy_df = df.copy()
+    # Count the occurrences of each genre
+    genre_counts = df['genres'].value_counts()
+
+    # Print the counts for Drama, Action, and Comedy
+    print(f"Number of Drama genres: {genre_counts.get('Drama', 0)}")
+    print(f"Number of Action genres: {genre_counts.get('Action', 0)}")
+    print(f"Number of Comedy genres: {genre_counts.get('Comedy', 0)}")
     df, genre_mapping = handle_non_numerical_data(df)
     df = standardize_dataframe(df)
 
@@ -22,6 +29,7 @@ def main():
     k = 4
     genres = np.unique(df['genres'].values)
     result_clusters = run_hierarchical_clustering(k, df.to_numpy(), genres)
+    final_df = {}
 
     # cluster_mapping = show_dendrogram(df, copy_df)
     # # for cluster_label, data_points in cluster_mapping.items():
@@ -46,6 +54,7 @@ def main():
     # # Print the genre counts for each cluster
     # for cluster_label, counts in genre_counts.items():
     #     print(f'Cluster {cluster_label} - Genre Counts: {counts}')
+    plot_conf_matrix(final_df)
 
 
 if __name__ == '__main__':

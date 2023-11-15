@@ -16,6 +16,7 @@ class KohonenNet:
     grid_type: str
     sum_dists: list[float]
     act_mat_sigmas: list[float] 
+    init_neuron_weights: np.ndarray
 
     def predict(self, sample: pd.Series) -> tuple[int, int]:
         sample = sample[self.cols]
@@ -290,6 +291,7 @@ def _build_kohonen_net(X: np.ndarray, cols: list[str], k: int, iters: int,
 
     neuron_positions = build_network_positions(k, even_displacements, odd_displacements)
     neuron_weights = weight_init_function(X, k)
+    init_neuron_weights = neuron_weights.copy()
 
     picker_mem = dict()
     neighbour_memory = dict()
@@ -299,7 +301,7 @@ def _build_kohonen_net(X: np.ndarray, cols: list[str], k: int, iters: int,
     if save_dist_sum:
         sum_dists = []
         act_mat_sigmas = []
-        kohonen_net = KohonenNet(cols, k, neuron_positions, neuron_weights, grid_type, sum_dists, act_mat_sigmas) 
+        kohonen_net = KohonenNet(cols, k, neuron_positions, neuron_weights, grid_type, sum_dists, act_mat_sigmas, init_neuron_weights) 
 
     curr_iter = 0 
 
@@ -337,4 +339,4 @@ def _build_kohonen_net(X: np.ndarray, cols: list[str], k: int, iters: int,
         act_mat = kohonen_net._activations_mat(X)
         act_mat_sigmas.append((curr_iter, act_mat.std()))
 
-    return KohonenNet(cols, k, neuron_positions, neuron_weights, grid_type, sum_dists, act_mat_sigmas)
+    return KohonenNet(cols, k, neuron_positions, neuron_weights, grid_type, sum_dists, act_mat_sigmas, init_neuron_weights)
