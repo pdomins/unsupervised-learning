@@ -23,9 +23,9 @@ def handle_non_numerical_data(df: pd.DataFrame):
     return df, genre_mapping
 
 
-def reverse_genre_mapping(df: pd.DataFrame, genre_mapping: dict):
+def reverse_genre_mapping(df: pd.DataFrame, genre_mapping: dict, column_name : str = 'genres'):
     reverse_mapping = {v: k for k, v in genre_mapping.items()}
-    df['genres'] = df['genres'].map(reverse_mapping)
+    df[column_name] = df[column_name].map(reverse_mapping)
     return df
 
 
@@ -35,6 +35,12 @@ def standardize_dataframe(df: pd.DataFrame):
     scaled_df = pd.DataFrame(scaled_data, columns=df.columns)
     return scaled_df
 
+def standarize_dataframe(df: pd.DataFrame):
+    copy_df = df.drop(columns='genres', errors='ignore')
+    scaler = MinMaxScaler()
+    scaled_data = scaler.fit_transform(copy_df)
+    scaled_df = pd.DataFrame(scaled_data, columns=copy_df.columns)
+    return scaled_df
 
 def filter_genres(df: pd.DataFrame):
     return df[df['genres'].isin(["Action", "Comedy", "Drama"])]
