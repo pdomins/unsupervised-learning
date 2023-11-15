@@ -14,16 +14,32 @@ class KohonenNet:
     neuron_positions: np.ndarray
     neuron_weights: np.ndarray
     grid_type: str
+    sum_dists: list[float]
+    act_mat_sigmas: list[float] 
 
     def predict(self, sample: pd.Series) -> tuple[int, int]:
         sample = sample[self.cols]
         X_p = sample.to_numpy()
-        return obtain_winning_neuron_idx(X_p, self.neuron_weights, self.k)
+        return self._predict(X_p)
+    
+    def _predict(self, X_p: np.ndarray) -> tuple[int, int]:
+        i, j, _ = obtain_winning_neuron_idx(X_p, self.neuron_weights, self.k)
+        return (i, j)
     
     def activations_mat(self, df: pd.DataFrame) -> np.ndarray:
         df = df[self.cols]
         predictions = df.apply(self.predict, axis=1)
         
+        act_mat = np.zeros((self.k, self.k), dtype=int)
+        for prediction in predictions:
+            i, j = prediction
+            act_mat[i, j] += 1
+
+        return act_mat
+    
+    def _activations_mat(self, X: np.ndarray) -> np.ndarray:
+        predictions = np.apply_along_axis(lambda X_p : self._predict(X_p), axis=1, arr=X)
+
         act_mat = np.zeros((self.k, self.k), dtype=int)
         for prediction in predictions:
             i, j = prediction
@@ -98,7 +114,7 @@ def build_network_positions(k: int, even_displacements: float = 0, odd_displacem
     return neuron_positions
 
 
-def obtain_winning_neuron_idx(X_p: np.ndarray, neuron_weights: np.ndarray, k: int) -> tuple[int, int]:
+def obtain_winning_neuron_idx(X_p: np.ndarray, neuron_weights: np.ndarray, k: int) -> tuple[int, int, float]:
     k_i = None
     k_j = None
     min_dist = None
@@ -115,7 +131,7 @@ def obtain_winning_neuron_idx(X_p: np.ndarray, neuron_weights: np.ndarray, k: in
                 k_i = i
                 k_j = j
 
-    return (k_i, k_j)
+    return (k_i, k_j, min_dist)
 
 
 def obtain_neighbour_neurons_idxs(k_i: int, k_j: int, neuron_positions: np.ndarray, k: int, curr_iter: int, iters: int,
@@ -221,7 +237,9 @@ def build_kohonen_net(df: pd.DataFrame, cols: list[str], k: int, iters: int,
                           [int, int, int, dict[str, Any]], tuple[float, dict[str, Any]]],
                       learning_rate_function: Callable[[int], float],
                       grid_type: str,
-                      random_state: np.random.Generator = None) -> KohonenNet:
+                      random_state: np.random.Generator = None, 
+                      save_dist_sum: bool = False,
+                      save_dist_offset: int = 1) -> KohonenNet:
     
     if random_state is None:
         random_state = np.random.default_rng()
@@ -241,8 +259,16 @@ def build_kohonen_net(df: pd.DataFrame, cols: list[str], k: int, iters: int,
     X = df.to_numpy()
     return _build_kohonen_net(X, cols, k, iters, KOHONEN_PARAMS["weight_init"][weight_init_f], 
                               KOHONEN_PARAMS["sample_picker"][sample_picker_f],
-                              neighbour_radius_function, learning_rate_function, grid_type)
+                              neighbour_radius_function, learning_rate_function, grid_type, save_dist_sum,
+                              save_dist_offset)
 
+def sumdist2winning(X: np.ndarray, neuron_weights: np.ndarray, k: int) -> float:
+    dist_sum = 0
+    for p in range(X.shape[0]):
+        X_p = X[p]
+        _, _, dist = obtain_winning_neuron_idx(X_p, neuron_weights, k)
+        dist_sum += dist
+    return dist_sum
 
 def _build_kohonen_net(X: np.ndarray, cols: list[str], k: int, iters: int,
                       weight_init_function: Callable[[np.ndarray, int], np.ndarray],
@@ -250,7 +276,7 @@ def _build_kohonen_net(X: np.ndarray, cols: list[str], k: int, iters: int,
                       neighbour_radius_function: Callable[
                           [int, int, int, dict[str, Any]], tuple[float, dict[str, Any]]],
                       learning_rate_function: Callable[[int], float],
-                      grid_type: str) -> KohonenNet:
+                      grid_type: str, save_dist_sum: bool = False, save_dist_offset: int = 1) -> KohonenNet:
     GRID_TYPES = obtain_grid_types_data()
 
     if grid_type not in GRID_TYPES:
@@ -268,10 +294,19 @@ def _build_kohonen_net(X: np.ndarray, cols: list[str], k: int, iters: int,
     picker_mem = dict()
     neighbour_memory = dict()
 
+    sum_dists = None
+    act_mat_sigmas = None
+    if save_dist_sum:
+        sum_dists = []
+        act_mat_sigmas = []
+        kohonen_net = KohonenNet(cols, k, neuron_positions, neuron_weights, grid_type, sum_dists, act_mat_sigmas) 
+
+    curr_iter = 0 
+
     for curr_iter in range(iters):
         X_p, picker_mem = sample_picker_function(X, picker_mem)
 
-        k_i, k_j = obtain_winning_neuron_idx(X_p, neuron_weights, k)
+        k_i, k_j, _ = obtain_winning_neuron_idx(X_p, neuron_weights, k)
 
         neighbour_idxs, neighbour_dists, radius, neighbour_memory = obtain_neighbour_neurons_idxs(k_i, k_j,
                                                                                                   neuron_positions, k,
@@ -287,5 +322,19 @@ def _build_kohonen_net(X: np.ndarray, cols: list[str], k: int, iters: int,
 
         update_neighbours(X_p, neuron_weights, neighbour_idxs, lr, neighbour_dists, radius, k_i, direct_scale,
                           diagonal_scale)
+        
+        if save_dist_sum and curr_iter % save_dist_offset == 0:
+            sum_dist = sumdist2winning(X, neuron_weights, k)
+            sum_dists.append((curr_iter, sum_dist))
 
-    return KohonenNet(cols, k, neuron_positions, neuron_weights, grid_type)
+            act_mat = kohonen_net._activations_mat(X)
+            act_mat_sigmas.append((curr_iter, act_mat.std()))
+
+    if save_dist_sum:
+        sum_dist = sumdist2winning(X, neuron_weights, k)
+        sum_dists.append((curr_iter, sum_dist))
+
+        act_mat = kohonen_net._activations_mat(X)
+        act_mat_sigmas.append((curr_iter, act_mat.std()))
+
+    return KohonenNet(cols, k, neuron_positions, neuron_weights, grid_type, sum_dists, act_mat_sigmas)
