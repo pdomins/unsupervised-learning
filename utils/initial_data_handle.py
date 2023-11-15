@@ -34,3 +34,7 @@ def standardize_dataframe(df: pd.DataFrame):
     scaled_data = scaler.fit_transform(df)
     scaled_df = pd.DataFrame(scaled_data, columns=df.columns)
     return scaled_df
+
+
+def filter_genres(df: pd.DataFrame):
+    return df[df['genres'].isin(["Action", "Comedy", "Drama"])]
